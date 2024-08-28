@@ -88,6 +88,7 @@ INSTALLED_APPS = [
     'authentication',
     'ms_auth_router',
     'app',
+    'notification',
 
     # django_cleanup cleanup files after deleting model instance with FileField or ImageField fields
     'django_cleanup.apps.CleanupConfig'
@@ -226,6 +227,18 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# Email
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.qq.com'
+EMAIL_PORT = 465
+EMAIL_HOST_USER = os.getenv('DJANGO_SUPERUSER_EMAIL')
+EMAIL_HOST_PASSWORD = os.getenv('DJANGO_EMAIL_HOST_PASSWORD')
+EMAIL_USE_SSL = True
+DEFAULT_FROM_EMAIL = os.getenv('DJANGO_SUPERUSER_EMAIL')
+
+ADMINS = [(os.getenv('DJANGO_SUPERUSER_USERNAME', 'admin'), os.getenv('DJANGO_SUPERUSER_EMAIL', 'admin@example.com')), ]
 
 
 # -----> RABBITMQ
