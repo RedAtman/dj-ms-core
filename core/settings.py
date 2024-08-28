@@ -296,3 +296,65 @@ if SENTRY_DSN := os.getenv('SENTRY_DSN', None):
 
         environment=environment
     )
+
+
+# Logging
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'standard': {
+            'format': '%(asctime)s [%(threadName)s:%(thread)d] [%(name)s:%(lineno)d] [%(module)s:%(funcName)s] [%(levelname)s]- %(message)s'
+        },
+        'simple': {
+            'format': '%(pathname)s:%(lineno)d:%(funcName)s [%(levelname)s]- %(message)s'
+        },
+    },
+    'handlers': {
+        # 'default': {
+        #     'level': 'DEBUG',
+        #     'class': 'utils.log_handler.MultiCompatibleTimedRotatingFileHandler',
+        #     'filename': '/var/log/core/default.log',
+        #     'when': 'MIDNIGHT',
+        #     'encoding': 'utf-8',
+        #     'formatter': 'standard',
+        # },
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple'
+        },
+        'mail_admins': {
+            'level': 'ERROR',
+            'class': 'django.utils.log.AdminEmailHandler',
+            'include_html': True,
+        },
+        # 'error': {
+        #     'level': 'ERROR',
+        #     'class': 'utils.log_handler.MultiCompatibleTimedRotatingFileHandler',
+        #     'filename': '/var/log/core/error.log',
+        #     'when': 'MIDNIGHT',
+        #     'encoding': 'utf-8',
+        #     'formatter': 'standard',
+        # },
+        # 'request_handler': {
+        #     'level': 'DEBUG',
+        #     'class': 'utils.log_handler.MultiCompatibleTimedRotatingFileHandler',
+        #     'filename': '/var/log/core/request.log',
+        #     'when': 'MIDNIGHT',
+        #     'backupCount': 5,
+        #     'formatter': 'standard',
+        #     'encoding': 'utf-8',
+        # },
+        # 'tasks': {
+        #     'level': 'DEBUG',
+        #     'class': 'utils.log_handler.MultiCompatibleTimedRotatingFileHandler',
+        #     'filename': '/var/log/core/tasks.log',
+        #     'when': 'MIDNIGHT',
+        #     'backupCount': 5,
+        #     'formatter': 'standard',
+        #     'encoding': 'utf-8',
+        # },
+    },
+    'root': {'handlers': ['console'], 'level': 'DEBUG'},
+}
