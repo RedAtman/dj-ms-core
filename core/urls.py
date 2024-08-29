@@ -17,16 +17,15 @@ import logging
 from importlib import import_module
 
 from django.apps import apps
+from django.conf import settings
 from django.contrib import admin
 from django.shortcuts import redirect
 from django.urls import URLResolver, include, path
 from django.utils.text import slugify
 
-from core.settings import APP_LABEL
-
 logger = logging.getLogger(__name__)
 
-URL_PREFIX = APP_LABEL + '/' if APP_LABEL else ''
+URL_PREFIX = settings.APP_LABEL + '/' if settings.APP_LABEL else ''
 
 
 urlpatterns = [

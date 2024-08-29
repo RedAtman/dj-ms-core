@@ -16,7 +16,7 @@ import dj_database_url
 import dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 
 # Load env variables from *.env* file
@@ -80,15 +80,15 @@ INSTALLED_APPS = [
     'whitenoise.runserver_nostatic',
     'corsheaders',
     'rest_framework',
-    'django_celery_beat',
-    'django_celery_results',
+    # 'django_celery_beat',
+    # 'django_celery_results',
     'auditlog',
 
     # microservice apps
     'authentication',
-    'ms_auth_router',
-    'app',
-    'notification',
+    # 'ms_auth_router',
+    # 'app',
+    # 'notification',
 
     # django_cleanup cleanup files after deleting model instance with FileField or ImageField fields
     'django_cleanup.apps.CleanupConfig'
