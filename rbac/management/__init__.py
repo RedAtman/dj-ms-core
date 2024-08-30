@@ -26,6 +26,7 @@ def create_permissions(app_config, verbosity, **kwargs):
     Creates all of the permissions defined in a model and a set of default
     permissions.
     """
+    return
     if not app_config.models_module:
         return
 
@@ -57,12 +58,12 @@ def create_permissions(app_config, verbosity, **kwargs):
     all_perms = set(RbacPermission.objects.filter(
         content_type__in=ctypes,
     ).values_list(
-        "content_type", "name"
+        "content_type", "codename"
     ))
     objs = []
     for ctype, (name, description) in searched_perms:
         if (ctype.pk, name) not in all_perms:
-            objs.append(RbacPermission(content_type=ctype, name=name, description=description))
+            objs.append(RbacPermission(content_type=ctype, codename=name))
     RbacPermission.objects.bulk_create(objs)
     if verbosity >= 2:
         for obj in objs:

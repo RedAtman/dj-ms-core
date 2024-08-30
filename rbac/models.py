@@ -6,8 +6,7 @@ from logging import getLogger
 from queue import Queue
 
 from django.conf import settings
-from django.contrib.auth.models import AbstractUser
-from django.contrib.contenttypes.models import ContentType
+from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.core.exceptions import ValidationError
 from django.db import connection, models, transaction
 from django.db.models import Q
@@ -19,6 +18,7 @@ from django.utils.translation import gettext_lazy as _
 
 from .deprecation import CallableFalse, CallableTrue
 
+RbacPermission = Permission
 logger = getLogger("rbac.models")
 
 
@@ -32,54 +32,6 @@ class AbstractBaseModel(models.Model):
     def save(self, *args, **kwargs):
         self.full_clean()
         super(AbstractBaseModel, self).save(*args, **kwargs)
-
-
-class RbacPermissionManager(models.Manager):
-    """
-    Manager class which supports get_by_natural_key().
-    """
-
-    def get_by_natural_key(self, name, app_label, model):
-        return self.get(
-            name=name,
-            content_type=ContentType.objects.get_by_natural_key(app_label,
-                                                                model)
-        )
-
-
-class RbacPermission(AbstractBaseModel):
-    name = models.CharField(max_length=100, db_index=True, verbose_name=_("Name"))
-    description = models.TextField(blank=True, verbose_name=_("Description"))
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, verbose_name=_("Model"))
-    objects = RbacPermissionManager()
-
-    def __str__(self):
-        return "%s | %s | %s" % (
-            self.content_type.app_label,
-            self.content_type,
-            self.name
-        )
-
-    class Meta:
-        app_label = 'rbac'
-        db_table = 'auth_rbac_permission'
-        verbose_name = _("RBAC permission")
-        verbose_name_plural = _("RBAC permissions")
-        ordering = [ 'name' ]
-        unique_together = (('content_type', 'name'),)
-        ordering = ('content_type__app_label', 'content_type__model',
-                    'name')
-
-    def clean(self):
-        import re
-
-        pattern = '^[a-z][a-z\-]+[a-z]$'
-        if re.match(pattern, self.name ) is None:
-            raise ValidationError("Only lowercase characters and \"-\" are allowed!")
-
-    def natural_key(self):
-        return (self.name,) + self.content_type.natural_key()
-    natural_key.dependencies = ['contenttypes.contenttype']
 
 
 class RbacRoleQuerySet(models.QuerySet):
@@ -167,15 +119,15 @@ class RbacRoleManager(models.Manager):
         return self.get(name=name)
 
 
-class RbacRole(AbstractBaseModel):
+class RbacRole(AbstractBaseModel, Group):
     """
     A role that can be assigned to users and other roles.
     """
-    name = models.CharField(max_length=255, db_index=True, unique=True)
+    # name = models.CharField(max_length=255, db_index=True, unique=True)
     description = models.TextField(blank=True)
     displayName = models.CharField(blank=True, max_length=254, verbose_name=_('Display name'))
     children = models.ManyToManyField( 'self', symmetrical=False, blank=True)
-    permissions = models.ManyToManyField(RbacPermission, blank=True)
+    # permissions = models.ManyToManyField(RbacPermission, blank=True)
     children_all = models.ManyToManyField( 'self', symmetrical=False, blank=True, editable=False, through="RbacRoleProfile", related_name="parents_all")
 
     objects = RbacRoleManager.from_queryset(RbacRoleQuerySet)()
