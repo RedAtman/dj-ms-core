@@ -1,0 +1,1 @@
+Permission: 原表 RbacPermission 中只有字段 'name' 储存权限定位符号， 由 auth.model.Permission 替代原来的 Permission 表后 需要将别处的对 'name' 的引用更换为 'codename'
