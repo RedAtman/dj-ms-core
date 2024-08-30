@@ -2,6 +2,7 @@
 from __future__ import print_function, unicode_literals
 
 from django.contrib.auth.decorators import user_passes_test
+
 from rbac.exceptions import RbacPermissionDenied
 
 

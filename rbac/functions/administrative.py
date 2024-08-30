@@ -1,5 +1,6 @@
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
+
 from rbac import models
 
 
@@ -37,7 +38,7 @@ def DeassignUser(user, role):
         ua = models.RbacUserAssignment.objects.get(user=user)
     except ObjectDoesNotExist:
         return False
-    
+
     if ua.roles.filter(id=role.id).count() > 0:
         ua.roles.remove(role)
         return True
@@ -72,19 +73,19 @@ def AddInheritance(role_asc, role_desc):
     """
     Establishes a new immediate inheritance relationship between the existing
     roles role_asc and role_desc.
-    
+
     role_asc >> role_desc
-    
+
     @rtype: bool
     """
     if role_desc in role_asc.get_all_parents():
         #cycle
         return False
-    
+
     if role_desc in role_asc.get_direct_children():
         #already a direct descendant
         return False
-    
+
     role_asc.children.add(role_desc)
     return True
 
@@ -93,9 +94,9 @@ def DeleteInheritance(role_asc, role_desc):
     """
     Deletes an existing immediate inheritance relationship between the existing
     roles role_asc and role_desc.
-    
+
     role_asc >> role_desc.
-    
+
     @rtype: bool
     """
     if role_desc in role_asc.get_direct_children():
@@ -141,4 +142,3 @@ def AddDescendant(role_asc, role_desc_name):
         return False
     else:
         return AddInheritance(role_asc, role_desc)
-

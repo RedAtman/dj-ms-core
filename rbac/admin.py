@@ -2,11 +2,12 @@
 from __future__ import print_function, unicode_literals
 
 from collections import OrderedDict
-from django.urls import re_path
+
 from django.contrib import admin
-from django.db.models import Prefetch, Count
+from django.db.models import Count, Prefetch
 from django.shortcuts import get_object_or_404
 from django.template.response import TemplateResponse
+from django.urls import re_path
 from django.utils.translation import gettext_lazy as _
 
 from . import models
@@ -20,13 +21,13 @@ class TopLevelRoleFilter(admin.SimpleListFilter):
     """
     title = _('top-level roles')
     parameter_name = 'toplevelroles'
-    
+
     def lookups(self, request, model_admin):
         return (
             ('1', _('Yes')),
             ('0', _('No')),
         )
-        
+
     def queryset(self, request, queryset):
         if self.value() == '1':
             return queryset.filter(parents_all=None)
@@ -42,7 +43,7 @@ class RoleAdmin(admin.ModelAdmin):
     filter_horizontal = ('permissions', 'children' )
     change_form_template = 'rbac/change_form.html'
     change_list_template = 'rbac/change_list.html'
-        
+
     def get_urls(self):
         urls = super(RoleAdmin, self).get_urls()
         my_urls = [
@@ -57,11 +58,13 @@ class RoleAdmin(admin.ModelAdmin):
         View which displays the effective permissions of a role
         with support for filtering by app_label and model.
         """
-        from django.utils.safestring import mark_safe
-        from rbac.models import RbacPermissionProfile
         import json
+
+        from django.utils.safestring import mark_safe
+
+        from rbac.models import RbacPermissionProfile
         role = get_object_or_404(models.RbacRole, pk=role_id)
-        
+
         permissions = {}
         for i in RbacPermissionProfile.objects.filter(
              role=role
@@ -78,18 +81,18 @@ class RoleAdmin(admin.ModelAdmin):
             if model not in permissions[app_label]:
                 permissions[app_label][model] = []
             permissions[app_label][model].append(permission)
-        
+
         permissions = mark_safe(json.dumps(permissions, sort_keys=True))
 
         return TemplateResponse(
-            request, 
+            request,
             'rbac/admin_effective_permissions.html',
             {
                 'permissions': permissions,
                  'role': role
             }
         )
-    
+
     def view_permissions_by_model(self, request):
         """
         Renders a table which shows all of the model permissions
@@ -103,22 +106,22 @@ class RoleAdmin(admin.ModelAdmin):
                         # Prefetching prevents quering the database for each permission
                         Prefetch('rbacrole_set')
                     ).exclude(rbacrole=None)
-    
+
         permissions_by_content_type = OrderedDict()
         for permission in permissions:
             if permission.content_type not in permissions_by_content_type:
                 permissions_by_content_type[permission.content_type] = []
             permissions_by_content_type[permission.content_type].append(permission)
-        
+
         return TemplateResponse(
             request,
-            'rbac/admin_model_permissions.html', 
+            'rbac/admin_model_permissions.html',
             {'permissions_by_ctype': permissions_by_content_type}
         )
-    
+
 
 class RbacSsdAdmin(admin.ModelAdmin):
-    filter_horizontal = ('roles', )    
+    filter_horizontal = ('roles', )
 
 
 class UserAssignmentAdmin(admin.ModelAdmin):

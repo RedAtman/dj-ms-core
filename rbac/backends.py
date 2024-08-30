@@ -34,11 +34,11 @@ class RbacUserBackendMixin(object):
             rbac_session = RbacSession(user=user_obj)
             logger.info("Using RBAC backend session for user %s." %user_obj.id)
             return rbac_session
-    
+
     def has_module_perms(self, user_obj, app_label):
         if user_obj.is_anonymous:
             return False
-        
+
         if not hasattr(user_obj, '_rbac_module_permission_cache'):
             logger.debug('has_module_perms(): Building app-label permission cache for user %s' %user_obj.pk)
             session = self._get_user_session(user_obj)
@@ -51,13 +51,13 @@ class RbacUserBackendMixin(object):
             user_obj._rbac_module_permission_cache = set(app_labels)
         else:
             logger.debug('has_module_perms(): Using app-label permission cache for user %s' %user_obj.pk)
-        
+
         return app_label in user_obj._rbac_module_permission_cache
 
     def has_perm(self, user_obj, perm, obj=None):
         if user_obj.is_anonymous:
             return False
-        
+
         if isinstance(perm, RbacPermission):
             verbose_perm = "%s.%s_%s" %(perm.content_type.app_label, perm.name, perm.content_type.model)
             if verbose_perm in self.get_all_permissions(user_obj):
@@ -74,11 +74,11 @@ class RbacUserBackendMixin(object):
                 model = obj.__name__.lower()
             else:
                 model = obj.__class__.__name__.lower()
-            
+
             perm_name = "%s.%s_%s" %(app_label, perm, model)
             if perm_name in self.get_all_permissions(user_obj):
                 return True
-            
+
             if hasattr(obj, "_has_perm") and not inspect.isclass(obj):
                 try:
                     perm = RbacPermission.objects.get(
@@ -89,16 +89,16 @@ class RbacUserBackendMixin(object):
                 except ObjectDoesNotExist:
                     logger.info("has_perm(): Permission %s not found!" %perm)
                     return False
-                
+
                 return obj._has_perm(user_obj, perm)
         return False
-    
+
     def _get_all_object_permissions(self, user_obj, obj):
         """
         Please note that when passing in an actual class instance as I{obj}
         you'll still only get the (global) Model permissions. This method will
         not return any context-specific permissions through obj._has_perm()!
-        
+
         @rtype: set
         """
         app_label = obj._meta.app_label
@@ -111,7 +111,7 @@ class RbacUserBackendMixin(object):
             #obj is a class
             model = obj.__name__
         model = model.lower()
-        
+
         session = self._get_user_session(user_obj)
         perms = RbacPermission.objects.filter(
                  content_type__app_label=app_label,
@@ -124,19 +124,19 @@ class RbacUserBackendMixin(object):
         """
         Either returns all permissions of the specified user or only the
         Model-permissions.
-        
+
         Please note that when passing in an actual class instance as I{obj}
         you'll still only get the (global) Model permissions. This method will
         not return any context-specific permissions through obj._has_perm()!
-        
+
         @rtype: set
         """
         if user_obj.is_anonymous:
             return set()
-        
+
         if obj:
             return self._get_all_object_permissions(user_obj, obj)
-        
+
         if not hasattr(user_obj, '_rbacperm_cache'):
             logger.debug('get_all_permissions(): Building permission cache for user %s' %user_obj.pk)
             session = self._get_user_session(user_obj)
@@ -153,7 +153,7 @@ class RbacUserBackendMixin(object):
         else:
             logger.debug('get_all_permissions(): Using permission cache for user %s' %user_obj.pk)
         return user_obj._rbacperm_cache
-        
+
 
 class RbacUserBackend(RbacUserBackendMixin, ModelBackend):
     """

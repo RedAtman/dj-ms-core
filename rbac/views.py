@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-from django.shortcuts import render
+
 from django.http import Http404, HttpResponseRedirect
+from django.shortcuts import render
 from django.views.decorators.cache import never_cache
+
 from rbac.forms import ActiveSessionRoleForm
 
 from .session import RbacSession
@@ -43,4 +45,3 @@ def set_active_session_roles(request):
         my_form = ActiveSessionRoleForm(rbac_session)
 
     return render(request, 'rbac/set_active_roles.html', {'form': my_form})
-

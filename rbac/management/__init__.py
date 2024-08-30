@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function, unicode_literals
+
 """
 Automatically creates permissions for non-system apps after calling migrate.
 """
@@ -27,8 +28,9 @@ def create_permissions(app_config, verbosity, **kwargs):
     """
     if not app_config.models_module:
         return
-    
+
     from django.contrib.contenttypes.models import ContentType
+
     from rbac.models import RbacPermission
 
     #do not add permissions for rbac and django models

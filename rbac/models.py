@@ -5,17 +5,18 @@ from datetime import datetime
 from logging import getLogger
 from queue import Queue
 
-from django.db import connection, models, transaction
-from django.db.models import Q
-from django.dispatch import receiver
-from django.core.exceptions import ValidationError
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ValidationError
+from django.db import connection, models, transaction
+from django.db.models import Q
+from django.dispatch import receiver
 from django.utils.html import format_html
 from django.utils.timezone import utc
-from django.utils.translation import gettext_lazy as _
 from django.utils.translation import gettext
+from django.utils.translation import gettext_lazy as _
+
 from .deprecation import CallableFalse, CallableTrue
 
 logger = getLogger("rbac.models")
@@ -37,7 +38,7 @@ class RbacPermissionManager(models.Manager):
     """
     Manager class which supports get_by_natural_key().
     """
-    
+
     def get_by_natural_key(self, name, app_label, model):
         return self.get(
             name=name,
@@ -68,7 +69,7 @@ class RbacPermission(AbstractBaseModel):
         unique_together = (('content_type', 'name'),)
         ordering = ('content_type__app_label', 'content_type__model',
                     'name')
-   
+
     def clean(self):
         import re
 
@@ -107,19 +108,19 @@ class RbacRoleQuerySet(models.QuerySet):
         children) need to be first in the list.
 
         Algorithm:
-        
+
             1. For each role we store their actual parents and the number of children.
-            
+
                The parents are saved in a dict of sets (`roles_parents[role_pk]`) and the number of children
                for each role are stored in a separate dict (`roles_num_children`)
-            
+
             2. Then we try to find all roles which do not have any children. We can yield these roles and mark them
                as handled by removing them from `roles_num_children`. Since they are now handled we can notify their
                parents that they have one child less to care about (dependency-wise). We do that by decrementing the
                child counter for each parent.
-            
+
             3. We do #2 until `roles_num_children` is empty.
-        
+
         Obviously the algorithm can only come to an end when the role graph is free of circles (which is enforced when
         adding new children).
         """
@@ -218,9 +219,9 @@ class RbacRole(AbstractBaseModel):
             parents.extend(i._get_all_parents_uncached())
 
         return set(parents)
-    
+
     def _get_all_children_uncached(self):
-        children = [] 
+        children = []
         for i in self.children.all():
             children.append(i)
             children.extend(i._get_all_children_uncached())
@@ -229,12 +230,12 @@ class RbacRole(AbstractBaseModel):
     def get_all_children(self):
         """
         Returns a QuerySet containing all (direct and indirect) child roles.
-        Note: Depends on RbacRoleProfile 
-        
+        Note: Depends on RbacRoleProfile
+
         @rtype: QuerySet
         """
         return self.children_all.all()
-    
+
     def get_direct_children(self):
         """
         @rtype: QuerySet
@@ -244,8 +245,8 @@ class RbacRole(AbstractBaseModel):
     def get_all_parents(self):
         """
         Returns a QuerySet containing all (direct and indirect) parent roles.
-        Note: Depends on RbacRoleProfile 
-        
+        Note: Depends on RbacRoleProfile
+
         @rtype: QuerySet
         """
         return RbacRole.objects.filter(children_all=self)
@@ -258,12 +259,12 @@ class RbacRole(AbstractBaseModel):
 
     def natural_key(self):
         return (self.name, )
- 
+
 
 class RbacRoleProfile(AbstractBaseModel):
     """
     This model acts as a flat role hierarchy and serves as a cache.
-    
+
     It caches all (direct and indirect) children of a role and can be used for
     both child and parent lookup.
     """
@@ -274,15 +275,15 @@ class RbacRoleProfile(AbstractBaseModel):
         app_label = 'rbac'
         db_table = 'auth_rbac_roleprofile'
         unique_together = ('parent', 'child')
-  
+
     def __str__(self):
         return "%s: %s" % (self.parent, self.child)
-  
+
     @staticmethod
     def create():
         """
         Creates a new RbacRoleProfile.
-        
+
         A role profile is a cache which speeds up child/parent lookups for
         roles.
         """
@@ -292,18 +293,18 @@ class RbacRoleProfile(AbstractBaseModel):
         else:
             currentTime = datetime.now()
 
-        adj_list = {}    
+        adj_list = {}
         bulk_list = []
         pairs = set()
 
         with transaction.atomic():
             #create an adjacency list of the role hierarchy
-            for parent, child in RbacRole.objects.exclude(children=None).values_list('id', 'children'):                
+            for parent, child in RbacRole.objects.exclude(children=None).values_list('id', 'children'):
                 if parent in adj_list:
                     adj_list[parent].append(child)
                 else:
                     adj_list[parent]=[child,]
-                        
+
             #Search for all child nodes which can be reached from parent through
             # a breadth-first-search.
             #Instead of coloring we're using a dict which keeps track of the
@@ -311,11 +312,11 @@ class RbacRoleProfile(AbstractBaseModel):
             for parent in adj_list:
                 child_queue = Queue()
                 found = {}
-                
+
                 for child in adj_list[parent]:
                     child_queue.put_nowait(child)
                     found[child]=True
-                                   
+
                 while not child_queue.empty():
                     node = child_queue.get_nowait()
                     pair = (parent, node)
@@ -323,7 +324,7 @@ class RbacRoleProfile(AbstractBaseModel):
                         pairs.add(pair)
                     else:
                         continue
-                        
+
                     bulk_list.append(
                        RbacRoleProfile(
                                        parent_id=parent,
@@ -336,18 +337,18 @@ class RbacRoleProfile(AbstractBaseModel):
                         for child in adj_list[node]:
                             if child not in found:
                                 child_queue.put_nowait(child)
-       
+
             #clear previous cache
             RbacRoleProfile.objects.all().delete()
             RbacRoleProfile.objects.bulk_create(bulk_list)
-        
+
         logger.debug("Finished creating RbacRoleProfile")
 
 
 class RbacPermissionProfile(AbstractBaseModel):
     """
     The RbacPermissionProfile serves as a cache for role <-> permission relations.
-    
+
     It parses the role graph and stores a role's permissions B{including permissions from child roles}.
     This makes permission lookups pretty fast - even when dealing with complex role graphs.
     """
@@ -368,9 +369,9 @@ class RbacPermissionProfile(AbstractBaseModel):
     def create():
         """
         Creates a new RbacPermissionProfile.
-        
+
         A role profile basically is a cache which speeds up permission lookups.
-        """        
+        """
         logger.debug("Creating RbacPermissionProfile")
         if settings.USE_TZ:
             currentTime = datetime.utcnow().replace(tzinfo=utc)
@@ -380,7 +381,7 @@ class RbacPermissionProfile(AbstractBaseModel):
         with transaction.atomic():
             #clear current permission profile
             RbacPermissionProfile.objects.all().delete()
-    
+
             bulk_list = []
             for role in RbacRole.objects.all():
                 for permission in RbacPermission.objects.filter(
@@ -395,7 +396,7 @@ class RbacPermissionProfile(AbstractBaseModel):
                                              create_date=currentTime
                                              )
                                      )
-      
+
             RbacPermissionProfile.objects.bulk_create(bulk_list)
         logger.debug("Finished creating RbacPermissionProfile")
 
@@ -415,7 +416,7 @@ class RbacSsdSet(AbstractBaseModel):
     def clean(self):
         if self.cardinality < 2:
             raise ValidationError("The cardinality must be greater than or equal to 2.")
-        
+
         #also make sure we are calling the validation function which validates
         # the m2m relation
         if self.pk:
@@ -459,7 +460,7 @@ class AbstractRbacUser(models.Model):
     is_staff = models.BooleanField(_('staff status'), default=False,
         help_text=_('Designates whether the user can log into this admin '
                     'site.'))
-    
+
     class Meta:
         abstract = True
 
@@ -532,13 +533,13 @@ class AbstractRbacUser(models.Model):
 class RbacUser(AbstractUser):
     """
     Adds extra RBAC functionality to Django's built-in User class.
-    
+
     All RBAC-models will use this model when using 'django.contrib.auth'.
     """
     groups = None
     user_permissions = None
     __rbac_backend = None
-    
+
     class Meta:
         app_label = 'rbac'
         db_table = 'auth_rbac_user'
@@ -584,28 +585,28 @@ def _rbac_check_ssd_userassignment(ssd_roles_set, ssd_cardinality):
     """
     Checks if any of the current RbacUserAssignments would violate a SSD set
     with ssd_roles and ssd_cardinality.
-    
+
     We are using raw SQL right here to drastically reduce the database load.
     A pure Django equivalent could look like this:
-    
+
         ssd_roles_id = ssd_roles.values_list('id', flat=True)
         for ua in RbacUserAssignment.objects.all():
             ua_roles_id = list(ua.roles.all().values_list('id', flat=True))
             effective_roles_id = RbacRole.objects.filter(
                                             parents_all__in=ua_roles_id
                                         ).distinct().values_list('id', flat=True)
-            
-            effective_roles_id = list(effective_roles_id)                            
+
+            effective_roles_id = list(effective_roles_id)
             effective_roles_id.extend(ua_roles_id)
             intersection = set(effective_roles_id).intersection(set(ssd_roles_id))
             if len(intersection) >= ssd_cardinality:
                 raise ValidationError("One or more RbacUserAssignments would be affected by this change!")
-    
+
     @param ssd_roles: A set of RbacRole ids
     @type ssd_roles: set
     @type ssd_cardinality: int
     @raise ValidationError: When the SSD set specified by the provided
-    parameters would break an existing RbacUserAssignment. 
+    parameters would break an existing RbacUserAssignment.
     """
     #get the ids of the roles which apply to this SSD set
     ssd_roles_id = ', '.join(map(lambda x: str(x), ssd_roles_set))
@@ -638,11 +639,11 @@ def _rbac_check_ssd_userassignment(ssd_roles_set, ssd_cardinality):
             rbacuserassignment_id\
            HAVING\
             ssd_cardinality>=%s"
-            
-    cursor = connection.cursor()                
+
+    cursor = connection.cursor()
     cursor.execute(sql, [ssd_cardinality])
     if cursor.fetchone():
-        raise ValidationError("One or more RbacUserAssignments would be affected by this change!")    
+        raise ValidationError("One or more RbacUserAssignments would be affected by this change!")
 
 
 def _rbac_check_role_ssd_ua(node_id, ssd_roles_set, ssd_cardinality):
@@ -650,21 +651,21 @@ def _rbac_check_role_ssd_ua(node_id, ssd_roles_set, ssd_cardinality):
     This function is called when adding new descendants to the role I{node_id}.
     It checks if any of the current RbacUserAssignment instances would violate
     the SSD set with ssd_roles_set and ssd_cardinality.
-        
+
     In order to keep the network and database load at a minimum we are using
     custom SQL here.
-    
+
     The functionality is close to L{_rbac_check_ssd_userassignment}. The only
-    difference is that we'll only check RbacUserAssignments which have the 
+    difference is that we'll only check RbacUserAssignments which have the
     role specified by I{node_id} in their effective roles.
-    
+
     @param node_id: The ID of a RbacRole
-    @type node_id: int 
+    @type node_id: int
     @param ssd_roles: A set of RbacRole ids
     @type ssd_roles: set
     @type ssd_cardinality: int
     @raise ValidationError: When the SSD set specified by the provided
-    parameters would break an existing RbacUserAssignment. 
+    parameters would break an existing RbacUserAssignment.
     """
     ssd_roles_id = ', '.join(map(lambda x: str(x), ssd_roles_set))
 
@@ -713,11 +714,11 @@ def _rbac_check_role_ssd_ua(node_id, ssd_roles_set, ssd_cardinality):
             rbacuserassignment_id\
            HAVING\
             ssd_cardinality>=%s"
-            
-    cursor = connection.cursor()                
+
+    cursor = connection.cursor()
     cursor.execute(sql, [node_id, node_id, ssd_cardinality])
     if cursor.fetchone():
-        raise ValidationError("One or more RbacUserAssignments would be affected by this change!")   
+        raise ValidationError("One or more RbacUserAssignments would be affected by this change!")
 
 
 @receiver(models.signals.m2m_changed, sender=RbacRole.permissions.through,
@@ -729,7 +730,7 @@ def _rbac_role_permissions_changed(sender, instance, action, reverse, model, pk_
     """
     if action == 'post_add' or action == 'post_remove' or action == 'post_clear':
         RbacPermissionProfile.create()
-    
+
 
 @receiver(models.signals.m2m_changed, sender=RbacRole.children.through,
           dispatch_uid="rbac.rbac_role_children_changed")
@@ -750,14 +751,14 @@ def _rbac_role_children_changed(sender, instance, action, reverse, model, pk_set
 def _rbac_role_children_validate(sender, instance, action, reverse, model, pk_set, **kwargs):
     """
     Validates the children of a role prior to adding them.
-    
+
         - check for cycle in the role graph.
         - check if adding a child role violates a SSD policy
     """
     if action == 'pre_add':
         if instance.pk in pk_set:
             raise ValidationError("Adding this child role would result in a cycle in the role graph!")
-        
+
         child_ids = RbacRole.objects.filter(
                         parents_all__in=pk_set
                     ).distinct().values_list('id', flat=True)
@@ -766,7 +767,7 @@ def _rbac_role_children_validate(sender, instance, action, reverse, model, pk_se
                      ).distinct().values_list('id', flat=True)
         # The set of effective roles we're adding
         add_roles_eff_set = pk_set.union(child_ids)
-        
+
         if len(add_roles_eff_set.intersection(parent_ids)) > 0:
             raise ValidationError("Adding this child role would result in a cycle in the role graph!")
 
@@ -776,12 +777,12 @@ def _rbac_role_children_validate(sender, instance, action, reverse, model, pk_se
         involved_roles_set = involved_roles_set.union(parent_ids)
         involved_roles_set = involved_roles_set.union(instance_children)
         involved_roles_set.add(instance.id)
-        
-        
+
+
         """
         We also need to make sure that existing RbacUserAssignments
         remain valid.
-        
+
         This is what we do here:
             1. Get all of the parent roles and child roles (including the ones
                we're adding right now) of *instance*. -> *involved_roles_set*
@@ -789,14 +790,14 @@ def _rbac_role_children_validate(sender, instance, action, reverse, model, pk_se
             3. For each *ssd_set* count how many roles of the SSD set apply to
                *involved_roles_set*.
             4. Get all of the RbacUserAssignments *uas* which have *instance*
-               in their effective roles. 
+               in their effective roles.
             5. Count all of the roles of each RbacUserAssignment in *uas*
                which are part of the current *ssd_set*, excluding the
                ones we've just counted in the third step.
             6. If the sum of the values from steps #3 and #5 is less
                than *ssd_set.cardinality*, we are good. Otherwise
                we'll need to raise a ValidationError.
-               
+
         For performance reasons some of these steps need custom SQL.
         """
         #Check if the graph violates a SSD constraint
@@ -809,39 +810,39 @@ def _rbac_role_children_validate(sender, instance, action, reverse, model, pk_se
 
             if cardinality >= ssd_set.cardinality:
                 raise ValidationError("Cannot add child role due to SSD policy!")
-                            
+
             #now check the RbacUserAssignment instances
             ua_ssd_roles = ssd_roles_set.difference(ssd_roles_involved_set)
-            max_ua_cardinality = ssd_set.cardinality - cardinality            
+            max_ua_cardinality = ssd_set.cardinality - cardinality
             _rbac_check_role_ssd_ua(instance.id, ua_ssd_roles, max_ua_cardinality)
-                            
+
 
 @receiver(models.signals.m2m_changed, sender=RbacSsdSet.roles.through,
           dispatch_uid="rbac.rbac_ssd_validation")
 def _rbac_ssd_validation(sender, instance, action, pk_set, **kwargs):
     """
     Validates a SSD set.
-    
+
     @TODO: Validate on pre_delete
     """
-    if action == 'pre_add':       
+    if action == 'pre_add':
         roles = RbacRole.objects.filter(Q(id__in=instance.roles.all()) |
                                         Q(id__in=pk_set)).distinct()
 
         if roles.count() < 2:
             raise ValidationError("Two or more roles are required for a SSD set.")
-        
+
         if roles.count() < instance.cardinality:
             raise ValidationError(
                "The cardinality of a SSD set must be less than or equal to the"
                " number of it's roles.")
-        
+
         if RbacRoleProfile.objects.filter(parent__in=roles, child__in=roles).count() > 0:
             raise ValidationError(
                "Failed to create SSD Set. Some of the specified roles are in a"
                " parent<->child relation."
             )
-            
+
         _rbac_check_ssd_userassignment(roles.values_list('id', flat=True), instance.cardinality)
 
 
@@ -850,10 +851,10 @@ def _rbac_ssd_validation(sender, instance, action, pk_set, **kwargs):
 def _rbac_ssd_enforcement(instance, action, pk_set, **kwargs):
     """
     Enforces the Static Separation of Duty constraints when adding roles
-    to a user.    
+    to a user.
     """
     if action == 'pre_add':
-        
+
         user_roles = RbacRole.objects.filter(\
                             models.Q(id__in=instance.user.get_all_roles()) | \
                             models.Q(id__in=pk_set)).distinct()
@@ -861,7 +862,7 @@ def _rbac_ssd_enforcement(instance, action, pk_set, **kwargs):
         user_childroles_id = list(RbacRoleProfile.objects.filter(parent__id__in=user_roles_id).values_list('child', flat=True))
         user_roles_id.extend(user_childroles_id)
         sql_in = ', '.join(map(lambda x: str(x), set(user_roles_id)))
-        
+
         sql = "SELECT\
                 SUM(CASE WHEN auth_rbac_ssdset_roles.rbacrole_id IN ("+sql_in+") THEN 1 ELSE 0 END)\
                 AS ssd_cardinality,\
@@ -887,4 +888,3 @@ def _rbac_ssd_enforcement(instance, action, pk_set, **kwargs):
             raise ValidationError(
                "A static separation of duty policy prevents you from adding"
                " this role!")
-

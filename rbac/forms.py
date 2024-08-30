@@ -2,7 +2,8 @@
 from __future__ import print_function, unicode_literals
 
 from django import forms
-from rbac.models import RbacRole, RbacPermissionProfile
+
+from rbac.models import RbacPermissionProfile, RbacRole
 
 
 class ActiveSessionRoleForm(forms.Form):
