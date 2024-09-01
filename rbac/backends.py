@@ -159,7 +159,10 @@ class RbacUserBackend(RbacUserBackendMixin, ModelBackend):
     """
     A version of `django.contrib.auth.backends.ModelBackend` with support for RBAC permission lookups.
     """
-    pass
+    def has_perm(self, user_obj, perm, obj=None):
+        if user_obj.is_superuser:
+            return True
+        return super(RbacUserBackend, self).has_perm(user_obj, perm, obj)
 
 
 class RbacRemoteUserBackend(RbacUserBackendMixin, RemoteUserBackend):
