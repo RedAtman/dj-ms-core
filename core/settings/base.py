@@ -324,6 +324,9 @@ LOGGING = {
         'simple': {
             'format': '%(pathname)s:%(lineno)d:%(funcName)s [%(levelname)s]- %(message)s'
         },
+        'dev': {
+            'format': '%(pathname)s:%(lineno)d: %(message)s'
+        },
     },
     'handlers': {
         # 'default': {
@@ -370,6 +373,21 @@ LOGGING = {
         #     'formatter': 'standard',
         #     'encoding': 'utf-8',
         # },
+    },
+    'loggers': {
+        'django.request': {
+            'handlers': ['mail_admins'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
+        # 'apps': { # I keep all my of apps under 'apps' folder, but you can also add them one by one, and this depends on how your virtualenv/paths are set
+        #     'handlers': ['log_file'],
+        #     'level': 'INFO',
+        #     'propagate': True,
+        # },
+        'faker': {
+            'level': 'INFO',
+        },
     },
     'root': {'handlers': ['console'], 'level': 'DEBUG'},
 }
