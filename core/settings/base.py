@@ -325,7 +325,7 @@ LOGGING = {
             'format': '%(pathname)s:%(lineno)d:%(funcName)s [%(levelname)s]- %(message)s'
         },
         'dev': {
-            'format': '%(pathname)s:%(lineno)d: %(message)s'
+            'format': '%(pathname)s:%(funcName)s:%(lineno)d: %(message)s'
         },
     },
     'handlers': {
