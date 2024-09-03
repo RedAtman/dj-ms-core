@@ -56,7 +56,7 @@ done
 
 DJ_MS_APP_LABEL=$(grep DJ_MS_APP_LABEL .env | xargs | awk -F "=" '{print $2}')
 if [[ -z "${DJ_MS_APP_LABEL}" ]]; then
-  DJ_MS_APP_LABEL="dj-ms-core"
+  DJ_MS_APP_LABEL="ms-django"
 fi
 
 create_nginx_conf () {
@@ -92,7 +92,7 @@ fi
 if $build; then
   DOCKER_BASE_IMAGE=$(grep DOCKER_BASE_IMAGE .env | xargs | awk -F "=" '{print $2}')
   if [[ -z "${DOCKER_BASE_IMAGE}" ]]; then
-    DOCKER_BASE_IMAGE="harleyking/dj-ms-core:latest"
+    DOCKER_BASE_IMAGE="redatman/ms-django:latest"
   fi
   . build.sh -t "$DOCKER_BASE_IMAGE" || exit 126
 fi
@@ -131,4 +131,3 @@ fi
 if [[ ! -f nginx/${DJ_MS_APP_LABEL}.conf || $rn ]]; then
   create_nginx_conf
 fi
-

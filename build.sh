@@ -6,7 +6,7 @@ help() {
   echo "Usage: build.sh OPTIONS [docker build args]"
   echo
   echo "Options:"
-  echo "-t, --tag string      Tag to build docker image. Default: harleyking/dj-ms-core:latest"
+  echo "-t, --tag string      Tag to build docker image. Default: redatman/ms-django:latest"
   echo "-h, --help            Print this Help."
   echo
   }
@@ -26,7 +26,7 @@ while test $# -gt 0; do
 done
 
 if [[ -z "${TAG}" ]]; then
-  TAG="harleyking/dj-ms-core:latest"
+  TAG="redatman/ms-django:latest"
 fi
 
 CACHE_DATE=$(date "+%Y-%m-%d-%H-%M-%S")
@@ -45,4 +45,3 @@ build () {
 }
 
 build || exit 1;
-

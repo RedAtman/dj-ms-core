@@ -10,7 +10,7 @@ Please, refer to the [official documentation](https://docs.docker.com/engine/ins
 
 Clone the repository to your server:
 ```shell
-git clone https://github.com/redatman/ms_django.git
+git clone https://github.com/redatman/ms-django.git
 ```
 
 <br>
