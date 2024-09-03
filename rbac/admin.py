@@ -5,12 +5,14 @@ from collections import OrderedDict
 
 from django.contrib import admin
 from django.contrib.auth import get_user_model
+from django.contrib.auth.admin import UserAdmin as authUserAdmin
 from django.contrib.auth.models import Group
 from django.db.models import Count, Prefetch
 from django.shortcuts import get_object_or_404
 from django.template.response import TemplateResponse
 from django.urls import re_path
 from django.utils.translation import gettext_lazy as _
+from guardian.admin import GuardedModelAdmin
 
 from . import models
 from .forms import RbacRoleForm
@@ -20,7 +22,7 @@ admin.site.unregister(Group)
 User = get_user_model()
 
 @admin.register(User)
-class UserAdmin(admin.ModelAdmin):
+class UserAdmin(authUserAdmin, GuardedModelAdmin):
 
     fieldsets = (
         (None, {'fields': ('username', 'password')}),
