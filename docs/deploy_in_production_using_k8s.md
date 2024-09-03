@@ -19,7 +19,7 @@ cp -r k8s/examples/app k8s/app
 Create a namespace
 
 ```shell
-kubectl create namespace dj-ms-core
+kubectl create namespace ms-django
 ```
 
 
@@ -57,19 +57,19 @@ kubectl exec -it <pod-name> -n postgres -- psql -U postgres
 Create a database:
 
 ```sql
-CREATE DATABASE dj_ms_core;
+CREATE DATABASE ms_django;
 ```
 
 Create a user:
 
 ```sql
-CREATE USER dj_ms_core WITH ENCRYPTED PASSWORD 'dj_ms_core';
+CREATE USER ms_django WITH ENCRYPTED PASSWORD 'ms_django';
 ```
 
 Grant permissions and exit:
 
 ```sql
-GRANT ALL PRIVILEGES ON DATABASE dj_ms_core TO dj_ms_core;
+GRANT ALL PRIVILEGES ON DATABASE ms_django TO ms_django;
 exit;
 ```
 
@@ -110,14 +110,14 @@ rabbitmq-7c78d7f66b-n84jr  1/1     Running   0          2m
 Create a user:
 
 ```shell
-kubectl exec -it <pod-name> -n rabbitmq -- rabbitmqctl add_user dj_ms_core dj_ms_core
+kubectl exec -it <pod-name> -n rabbitmq -- rabbitmqctl add_user ms_django ms_django
 ```
 
 Grant permissions:
 
 ```shell
-kubectl exec -it <pod-name> -n rabbitmq -- rabbitmqctl set_user_tags dj_ms_core administrator
-kubectl exec -it <pod-name> -n rabbitmq -- rabbitmqctl set_permissions -p / dj_ms_core ".*" ".*" ".*"
+kubectl exec -it <pod-name> -n rabbitmq -- rabbitmqctl set_user_tags ms_django administrator
+kubectl exec -it <pod-name> -n rabbitmq -- rabbitmqctl set_permissions -p / ms_django ".*" ".*" ".*"
 ```
 
 
@@ -144,8 +144,8 @@ To add a TLS certificate, you should create a secret with the following files:
 Then you can create a secret and deploy the application:
 
 ```shell
-kubectl delete secret dj-ms-core-tls-secret -n dj-ms-core
-kubectl create secret tls dj-ms-core-tls-secret --cert=k8s/app/tls.crt --key=k8s/app/tls.key -n dj-ms-core
+kubectl delete secret ms-django-tls-secret -n ms-django
+kubectl create secret tls ms-django-tls-secret --cert=k8s/app/tls.crt --key=k8s/app/tls.key -n ms-django
 ```
 
 Then you should add the following lines to the `Ingress` resource under the `spec` section:
@@ -155,7 +155,7 @@ Then you should add the following lines to the `Ingress` resource under the `spe
   tls:
     - hosts:
         - app.dj-ms.dev
-      secretName: dj-ms-core-tls-secret
+      secretName: ms-django-tls-secret
 ...
 ```
 
@@ -186,7 +186,7 @@ Then add following lines to the `Ingress` resource under the `spec` section:
   tls:
     - hosts:
         - app.dj-ms.dev
-      secretName: dj-ms-core-tls-secret
+      secretName: ms-django-tls-secret
 ...
 ```
 
@@ -201,17 +201,17 @@ After that, you should create an `.env` file in the `k8s/app` directory.
 It should contain the following variables:
   - `DJANGO_DEBUG` - normally `False` for production
   - `DJANGO_SECRET_KEY` - some random string. You can generate one with `openssl rand -base64 32`
-  - `DATABASE_URL` - Postgres connection string, e.g. `postgres://dj_ms_core:dj_ms_core@postgres.postgres:5432/dj_ms_core`
+  - `DATABASE_URL` - Postgres connection string, e.g. `postgres://ms_django:ms_django@postgres.postgres:5432/ms_django`
   - `DJANGO_ALLOWED_HOSTS` - your domain name. For example, `app.dj-ms.dev`
   - `DJANGO_CSRF_TRUSTED_ORIGINS` - usually the same as `DJANGO_ALLOWED_HOSTS` but with `https://` prefix. For example, `https://app.dj-ms.dev`
-  - `BROKER_URL` - RabbitMQ connection string, e.g. `amqp://dj_ms_core:dj_ms_core@rabbitmq.rabbitmq:5672`
+  - `BROKER_URL` - RabbitMQ connection string, e.g. `amqp://ms_django:ms_django@rabbitmq.rabbitmq:5672`
 
 Then you can create a secret and deploy the application:
 
 ```shell
-kubectl delete secret dj-ms-core-secret -n dj-ms-core
-kubectl create secret generic dj-ms-core-secret --from-env-file=k8s/app/.env -n dj-ms-core
-kubectl apply -f k8s/app -n dj-ms-core
+kubectl delete secret ms-django-secret -n ms-django
+kubectl create secret generic ms-django-secret --from-env-file=k8s/app/.env -n ms-django
+kubectl apply -f k8s/app -n ms-django
 ```
 
 
@@ -222,11 +222,11 @@ After successful deployment, you should be able to access your application at `h
 But if it's first time you deploy your application, you should create a superuser.
 
 ```shell
-kubectl get pods -n dj-ms-core
+kubectl get pods -n ms-django
 ```
 
 ```shell
-kubectl exec -it <pod-name> -n dj-ms-core -- python manage.py createsuperuser
+kubectl exec -it <pod-name> -n ms-django -- python manage.py createsuperuser
 ```
 
 Then you can access your application at `https://app.example.com/admin` and log in with the credentials you have just created.
