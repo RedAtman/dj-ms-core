@@ -26,7 +26,6 @@ def create_permissions(app_config, verbosity, **kwargs):
     Creates all of the permissions defined in a model and a set of default
     permissions.
     """
-    return
     if not app_config.models_module:
         return
 
@@ -71,4 +70,4 @@ def create_permissions(app_config, verbosity, **kwargs):
 
 
 # Do not add permissions to "auth_permission", as it is not used
-signals.post_migrate.disconnect(dispatch_uid="django.contrib.auth.management.create_permissions")
+# signals.post_migrate.disconnect(dispatch_uid="django.contrib.auth.management.create_permissions")
