@@ -13,6 +13,9 @@ django-cleanup
 # temporary fix for django-auditlog. will change to original source when Jazzband merges my PR
 git+https://github.com/HarleyK1ng/django-auditlog.git@master#egg=django-auditlog
 
+# Django Admin
+-r requirements_admin.txt
+
 # Miscroservices
 dj-ms-auth-router==1.4.0
 
@@ -28,6 +31,8 @@ whitenoise
 celery
 django-celery-beat
 django-celery-results
+redis==5.0.8
+flower==2.0.1
 
 # Message broker
 pika

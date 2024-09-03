@@ -1,5 +1,5 @@
 """
-ASGI config for dj_ms_core project.
+ASGI config for ms_django project.
 
 It exposes the ASGI callable as a module-level variable named ``application``.
 

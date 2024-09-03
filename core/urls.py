@@ -1,4 +1,4 @@
-"""dj_ms_core URL Configuration
+"""ms_django URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/4.1/topics/http/urls/
@@ -13,13 +13,19 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+import logging
+from importlib import import_module
+
+from django.apps import apps
+from django.conf import settings
 from django.contrib import admin
 from django.shortcuts import redirect
-from django.urls import path, include
+from django.urls import URLResolver, include, path
+from django.utils.text import slugify
 
-from core.settings import APP_LABEL
+logger = logging.getLogger(__name__)
 
-URL_PREFIX = APP_LABEL + '/' if APP_LABEL else ''
+URL_PREFIX = settings.APP_LABEL + '/' if settings.APP_LABEL else ''
 
 
 urlpatterns = [
@@ -42,3 +48,19 @@ urlpatterns += [
     path('api/' + URL_PREFIX, include('app.api.urls'), name='api'),
     path(URL_PREFIX, include('app.urls')),
 ]
+
+
+for app_config in apps.get_app_configs():
+    try:
+        mod = import_module("%s.%s" % (app_config.name, 'urls'))
+        # logger.debug(('mod', app_config.name))
+        # possibly cleanup the after the imported module?
+        # might fuss up the `include(...)` or leave a polluted namespace
+    except ImportError:
+        # logger.error(('import error', app_config.name))
+        # cleanup after module import if fails, maybe you can let the `include(...)` report failures
+        pass
+    else:
+        url: URLResolver = path(r'%s/' % slugify(app_config.label), include('%s.urls' % app_config.name))
+        # logger.debug((app_config.label, 'url', url))
+        urlpatterns.append(url)

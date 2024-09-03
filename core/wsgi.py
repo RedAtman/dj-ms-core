@@ -1,5 +1,5 @@
 """
-WSGI config for dj_ms_core project.
+WSGI config for ms_django project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 
