@@ -1,5 +1,6 @@
 FROM python:3.10-alpine AS python-deps
 
+COPY requirements_admin.txt /
 COPY requirements.txt /
 
 RUN apk add --no-cache py3-virtualenv py3-pip git && \
