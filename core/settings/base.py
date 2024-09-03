@@ -85,7 +85,7 @@ INSTALLED_APPS = [
     # 'django_celery_results',
 
     # microservice apps
-    'authentication',
+    # 'authentication',
     # 'ms_auth_router',
     # 'app',
     # 'notification',
@@ -151,7 +151,7 @@ if auth_db := os.getenv('AUTH_DB_URL'):
     AUTH_DB = 'auth_db'
     DATABASES['auth_db'] = dj_database_url.parse(auth_db)
 
-AUTH_USER_MODEL = 'authentication.User'
+AUTHENTICATION_BACKENDS = []
 
 # -----> Rest Framework
 REST_AUTH_TOKEN_MODEL = 'authentication.Token'
