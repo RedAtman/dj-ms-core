@@ -6,7 +6,7 @@ from logging import getLogger
 from queue import Queue
 
 from django.conf import settings
-from django.contrib.auth.models import AbstractUser, Group, Permission
+from django.contrib.auth.models import AbstractUser, Permission
 from django.core.exceptions import ValidationError
 from django.db import connection, models, transaction
 from django.db.models import Q
@@ -18,7 +18,6 @@ from django.utils.translation import gettext_lazy as _
 
 from .deprecation import CallableFalse, CallableTrue
 
-RbacPermission = Permission
 logger = getLogger("rbac.models")
 
 
@@ -32,6 +31,23 @@ class AbstractBaseModel(models.Model):
     def save(self, *args, **kwargs):
         self.full_clean()
         super(AbstractBaseModel, self).save(*args, **kwargs)
+
+
+class RbacPermission(Permission):
+    """
+    TODO: Maybe use `from django.contrib.auth.models.Permission` instead.
+    """
+
+    class Meta:
+        proxy = True
+        app_label = 'rbac'
+        db_table = 'auth_rbac_permission'
+        verbose_name = _("RBAC permission")
+        verbose_name_plural = _("RBAC permissions")
+        # ordering = [ 'name' ]
+        # unique_together = (('content_type', 'name'),)
+        # ordering = ('content_type__app_label', 'content_type__model',
+        #             'name')
 
 
 class RbacRoleQuerySet(models.QuerySet):
@@ -119,15 +135,15 @@ class RbacRoleManager(models.Manager):
         return self.get(name=name)
 
 
-class RbacRole(AbstractBaseModel, Group):
+class RbacRole(AbstractBaseModel):
     """
     A role that can be assigned to users and other roles.
     """
-    # name = models.CharField(max_length=255, db_index=True, unique=True)
+    name = models.CharField(max_length=255, db_index=True, unique=True)
     description = models.TextField(blank=True)
     displayName = models.CharField(blank=True, max_length=254, verbose_name=_('Display name'))
     children = models.ManyToManyField( 'self', symmetrical=False, blank=True)
-    # permissions = models.ManyToManyField(RbacPermission, blank=True)
+    permissions = models.ManyToManyField(RbacPermission, blank=True)
     children_all = models.ManyToManyField( 'self', symmetrical=False, blank=True, editable=False, through="RbacRoleProfile", related_name="parents_all")
 
     objects = RbacRoleManager.from_queryset(RbacRoleQuerySet)()

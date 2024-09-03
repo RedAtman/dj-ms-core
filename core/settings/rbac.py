@@ -10,6 +10,8 @@ MIDDLEWARE += [  # noqa: F405
     'rbac.middleware.RbacSessionMiddleware',
 ]
 
+AUTH_USER_MODEL = 'rbac.RbacUser'
+
 # optional: Configure RBAC_DEFAULT_ROLES. This option accepts a tuple of role names which will be activated by default in RBAC sessions. If you omit this setting then all of the user's roles will be activated within a session.
 # RBAC_DEFAULT_ROLES
 

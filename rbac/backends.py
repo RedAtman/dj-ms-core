@@ -146,10 +146,10 @@ class RbacUserBackendMixin(object):
                      'content_type'
                     ).values_list(
                      'content_type__app_label',
-                     'name',
-                     'content_type__model',
+                     'codename',
+                    #  'content_type__model',
                     )
-            user_obj._rbacperm_cache = set(map(lambda x: '%s.%s_%s' %(x[0], x[1], x[2]), perms))
+            user_obj._rbacperm_cache = set(map(lambda x: '%s.%s' %(x[0], x[1]), perms))
         else:
             logger.debug('get_all_permissions(): Using permission cache for user %s' %user_obj.pk)
         return user_obj._rbacperm_cache
@@ -159,10 +159,7 @@ class RbacUserBackend(RbacUserBackendMixin, ModelBackend):
     """
     A version of `django.contrib.auth.backends.ModelBackend` with support for RBAC permission lookups.
     """
-    def has_perm(self, user_obj, perm, obj=None):
-        if user_obj.is_superuser:
-            return True
-        return super(RbacUserBackend, self).has_perm(user_obj, perm, obj)
+    pass
 
 
 class RbacRemoteUserBackend(RbacUserBackendMixin, RemoteUserBackend):
