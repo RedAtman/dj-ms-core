@@ -1,0 +1,8 @@
+# Django Admin
+django-grappelli==4.0.1
+django-admin-tailwind==0.0.31
+django-unfold==0.37.0
+
+# Authorization
+# Per object permissions for Django
+django-guardian
