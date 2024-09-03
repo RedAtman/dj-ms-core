@@ -1,0 +1,50 @@
+{
+    "[python]": {
+        "diffEditor.ignoreTrimWhitespace": false,
+        "gitlens.codeLens.symbolScopes": [
+            "!Module"
+        ],
+        "editor.defaultFoldingRangeProvider": "ms-python.vscode-pylance",
+        "editor.defaultFormatter": "ms-python.black-formatter",
+        // "editor.defaultFormatter": "charliermarsh.ruff",
+        "editor.formatOnType": true,
+        "editor.formatOnSave": true,
+        "editor.wordBasedSuggestions": "allDocuments",
+        "editor.codeActionsOnSave": {
+            "python.sortImports": "explicit",
+            "python.organizeImports": "explicit",
+            "python.reportImportCycles": "explicit",
+            "python.removeUnusedImports": "explicit",
+            "source.organizeImports": "explicit",
+            // removeUnusedImports
+            "source.unusedImports": "explicit",
+            "source.removeUnusedImports": "explicit",
+            "source.sortImports": "explicit",
+            "source.fixAll": "explicit",
+            "source.fixAll.stylelint": "explicit",
+            "source.fixAll.markdownlint": "explicit",
+            "source.fixAll.json": "explicit",
+            "source.fixAll.css": "explicit",
+            "source.fixAll.less": "explicit",
+            "source.fixAll.sass": "explicit",
+            "source.fixAll.scss": "explicit",
+            "source.fixAll.yaml": "explicit",
+            "source.fixAll.xml": "explicit",
+            "source.fixAll.html": "explicit",
+            "source.fixAll.python": "explicit"
+        },
+    },
+    // "ruff.organizeImports": false,
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 5432,
+            "driver": "PostgreSQL",
+            "name": "ms-django",
+            "username": "postgres",
+            "database": "postgres"
+        }
+    ],
+    "commentTranslate.targetLanguage": "zh-CN"
+}
