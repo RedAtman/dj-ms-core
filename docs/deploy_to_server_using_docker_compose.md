@@ -10,14 +10,14 @@ Please, refer to the [official documentation](https://docs.docker.com/engine/ins
 
 Clone the repository to your server:
 ```shell
-git clone https://github.com/dj-ms/dj-ms-core.git
+git clone https://github.com/redatman/ms_django.git
 ```
 
 <br>
 
 Go to the project directory:
 ```shell
-cd dj-ms-core
+cd ms-django
 ```
 
 <br>
@@ -56,7 +56,7 @@ And that's all the difference between running locally and running in production.
 So you can use all the commands you used to run locally. Just add `-f docker-compose.yml -f docker-compose.prod.yml` to them.
 
 
-> On master node you might need to open ports for DB and RabbitMQ. 
+> On master node you might need to open ports for DB and RabbitMQ.
 > Search solution in the internet, because it depends on your cloud provider, OS, etc.
 > To open ports in VPS on Ubuntu, you can use the following commands:
 > ```shell
@@ -221,4 +221,3 @@ If you see the following message, then everything is fine:
 Congratulations, all renewals succeeded. The following certs have been renewed:
   /etc/letsencrypt/live/<YOUR_DOMAIN_NAME>/fullchain.pem (success)
 ```
-

@@ -19,7 +19,7 @@ Other requirements will be explained below.
 
 ### Core service
 To get started with core service on local machine, you don't need to set any environment variables.
-To deploy it to the server in production mode, `DJANGO_SECRET_KEY`, 
+To deploy it to the server in production mode, `DJANGO_SECRET_KEY`,
 `DJANGO_ALLOWED_HOSTS` and `DJANGO_CSRF_TRUSTED_ORIGINS` will be enough:
 
 ```dotenv
@@ -27,7 +27,7 @@ DJANGO_SECRET_KEY=<some-strict-secret-key>
 ```
 
 ### Fork app / microservice
-To run second / third / etc. microservice somewhere, including server in production mode, 
+To run second / third / etc. microservice somewhere, including server in production mode,
 you need to set at least the following variables:
 
 ```dotenv
@@ -165,8 +165,8 @@ Default **postgres** database is `postgres`.
 DOCKER_BASE_IMAGE=
 ```
 
-Which base image should be used for building the service? 
-By default, `harleyking/dj-ms-core:latest` image is used.
+Which base image should be used for building the service?
+By default, `redatman/ms-django:latest` image is used.
 This setting must be exactly the same in every microservice.
 
 <br>
@@ -178,7 +178,7 @@ DJ_MS_APP_LABEL=
 In main microservice this setting should be skipped.
 In every other microservice you should set a unique label for the app.
 It will be used for building appropriate docker image and as a url prefix.
-For example: label `products` will result in the following docker image: `dj-ms-products:latest`.
+For example: label `products` will result in the following docker image: `ms-django-products:latest`.
 And the url for the service will be: `http://localhost:8000/products/`
 
 <br>
@@ -264,4 +264,3 @@ SENTRY_ENVIRONMENT=
 ```
 
 Default value is `development`.
-
