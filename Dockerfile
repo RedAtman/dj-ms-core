@@ -1,6 +1,5 @@
 FROM python:3.10-alpine AS python-deps
 
-COPY requirements_dev.txt /
 COPY requirements_admin.txt /
 COPY requirements.txt /
 

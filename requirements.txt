@@ -16,7 +16,6 @@ django-cuser==2017.3.16
 
 # Django Admin
 -r requirements_admin.txt
--r requirements_dev.txt
 
 # Miscroservices
 dj-ms-auth-router==1.4.0
