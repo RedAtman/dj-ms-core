@@ -12,9 +12,11 @@ django-cleanup
 # django-auditlog
 # temporary fix for django-auditlog. will change to original source when Jazzband merges my PR
 git+https://github.com/HarleyK1ng/django-auditlog.git@master#egg=django-auditlog
+django-cuser==2017.3.16
 
 # Django Admin
 -r requirements_admin.txt
+-r requirements_dev.txt
 
 # Miscroservices
 dj-ms-auth-router==1.4.0

@@ -34,6 +34,13 @@ urlpatterns = [
 ]
 
 
+if settings.DEBUG:
+    import debug_toolbar
+    urlpatterns = [
+        path('__debug__/', include(debug_toolbar.urls)),
+    ] + urlpatterns
+
+
 def get_redirect_url():
     if URL_PREFIX:
         return redirect(f'{URL_PREFIX}')
