@@ -92,8 +92,8 @@ jobs:
 
       - name: Build and tag Docker image
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/my-app:${{ env.TAG }} .
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/ms-django:${{ env.TAG }} .
 
       - name: Push Docker image to Docker Hub
         run: |
-          docker push ${{ secrets.DOCKER_USERNAME }}/my-app:${{ env.TAG }}
+          docker push ${{ secrets.DOCKER_USERNAME }}/ms-django:${{ env.TAG }}
