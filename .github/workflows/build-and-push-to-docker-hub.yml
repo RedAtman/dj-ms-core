@@ -12,20 +12,17 @@ name: Publish Docker image
 on:
   # release:
   #   types: [created]
-  # workflow_run:
-  #   workflows: ["Create Release and Tag on Merge"]
-  #   types: [completed]
+  #   types: [published]  # Trigger when a new release is published
   # push:
   #   branches:
   #     - "**"
   #   tags:
+  #     - '*'  # Trigger on any tag push
   #     - "v*.*.*"
   # pull_request:
-  push:
-    tags:
-      - '*'  # Trigger on any tag push
-  release:
-    types: [published]  # Trigger when a new release is published
+  workflow_run:
+    workflows: ["Create Release and Tag on Merge"]
+    types: [completed]
 
 jobs:
   # push_to_docker_hub:
