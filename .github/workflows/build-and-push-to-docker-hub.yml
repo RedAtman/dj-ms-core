@@ -46,7 +46,7 @@ jobs:
             type=ref,event=branch
             type=ref,event=pr
             type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}.{{minor}}.{{patch}}"
             type=semver,pattern={{major}}
 
       - name: Log in to Docker Hub
