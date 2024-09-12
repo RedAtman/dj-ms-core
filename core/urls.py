@@ -30,7 +30,7 @@ URL_PREFIX = settings.APP_LABEL + '/' if settings.APP_LABEL else ''
 
 urlpatterns = [
     path(URL_PREFIX + 'admin/', admin.site.urls),
-    path('api/auth/', include('authentication.api.urls'), name='authentication'),
+    # path('api/auth/', include('authentication.api.urls'), name='authentication'),
 ]
 
 
