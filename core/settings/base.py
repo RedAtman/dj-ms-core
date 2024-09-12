@@ -137,7 +137,7 @@ DATABASE_ROUTERS = [
     'ms_auth_router.routers.DefaultRouter',
 ]
 
-ROUTE_APP_LABELS = ('authentication', )
+ROUTE_APP_LABELS = []
 
 AUTH_DB = 'default'
 
@@ -152,16 +152,10 @@ if auth_db := os.getenv('AUTH_DB_URL'):
 AUTHENTICATION_BACKENDS = []
 
 # -----> Rest Framework
-REST_AUTH_TOKEN_MODEL = 'authentication.Token'
-
 REST_AUTH_TOKEN_TTL = os.getenv('DJANGO_REST_AUTH_TOKEN_TTL', 60 * 60 * 24)
-
-REST_AUTH_TOKEN_CREATOR = 'authentication.utils.create_token'
-
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.SessionAuthentication',
-        'authentication.utils.ExpiringTokenAuthentication'
     ],
     'DEFAULT_FILTER_BACKENDS': [
         'rest_framework.filters.SearchFilter',
