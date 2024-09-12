@@ -142,7 +142,7 @@ ROUTE_APP_LABELS = []
 AUTH_DB = 'default'
 
 DATABASES = {
-    'default': dj_database_url.config(default='sqlite:///db.sqlite3', conn_max_age=600)
+    'default': dj_database_url.config(default=os.getenv('DATABASE_URL', 'sqlite:///db.sqlite3'), conn_max_age=600)
 }
 
 if auth_db := os.getenv('AUTH_DB_URL'):
