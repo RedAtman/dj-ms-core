@@ -6,3 +6,6 @@ django-unfold==0.37.0
 # Authorization
 # Per object permissions for Django
 django-guardian
+
+# Organizations
+django-orghierarchy==0.4.0
