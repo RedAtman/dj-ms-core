@@ -2,7 +2,7 @@
 refer: https://django-auditlog.readthedocs.io/
 """
 
-from core.settings.rbac import *  # noqa: F403
+from core.settings.celery import *  # noqa: F403
 
 INSTALLED_APPS.insert(-1, 'auditlog')  # noqa: F405
 
